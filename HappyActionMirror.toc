@@ -1,0 +1,15 @@
+## Interface: 120001
+## Title: HappyActionMirror
+## Notes: Displays a copy of Action Bar 1 when flying or special vehicle/pet bars are active
+## Author: You
+## Version: 1.0.0
+## SavedVariables: HappyActionMirrorDB
+
+Config.lua
+ActionBarState.lua
+ActionButtonUtils.lua
+Options.lua
+UI.lua
+Events.lua
+Core.lua
+
