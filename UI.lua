@@ -280,6 +280,9 @@ function HappyActionMirror:CreateActionBarButton(parent, index)
 end
 
 function HappyActionMirror:UpdateButtonAppearance()
+    if self.inCombat then
+        return
+    end
     if not self.frame or not self.frame.buttonContainer or not self.frame.buttonContainer.buttons then
         return
     end
@@ -362,7 +365,10 @@ function HappyActionMirror:ToggleFrameVisibility()
     if not self.frame then
         return
     end
-
+    if self.inCombat then
+        self.frame:Hide()
+        return
+    end
     if self:ShouldShowFrame() then
         self.frame:Show()
     else

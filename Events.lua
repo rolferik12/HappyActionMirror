@@ -49,6 +49,8 @@ function HappyActionMirror:RegisterEvents()
         "SPELL_UPDATE_USABLE",
         "SPELL_UPDATE_CHARGES",
         "UPDATE_BINDINGS",
+        "PLAYER_REGEN_DISABLED", -- Entering combat
+        "PLAYER_REGEN_ENABLED",  -- Leaving combat
     }
 
     for _, eventName in ipairs(eventsToRegister) do
@@ -62,17 +64,20 @@ function HappyActionMirror:RegisterEvents()
     eventFrame.visibilityCheckTimer = 0
     eventFrame.buttonRefreshTimer = 0
     eventFrame:SetScript("OnUpdate", function(self, elapsed)
-        self.visibilityCheckTimer = self.visibilityCheckTimer + elapsed
-        self.buttonRefreshTimer = self.buttonRefreshTimer + elapsed
+        -- Only update if not in combat lockdown
+        if not HappyActionMirror.inCombat then
+            self.visibilityCheckTimer = self.visibilityCheckTimer + elapsed
+            self.buttonRefreshTimer = self.buttonRefreshTimer + elapsed
 
-        if self.visibilityCheckTimer >= 0.25 then
-            self.visibilityCheckTimer = 0
-            HappyActionMirror:ToggleFrameVisibility()
-        end
+            if self.visibilityCheckTimer >= 0.25 then
+                self.visibilityCheckTimer = 0
+                HappyActionMirror:ToggleFrameVisibility()
+            end
 
-        if self.buttonRefreshTimer >= 0.1 then
-            self.buttonRefreshTimer = 0
-            HappyActionMirror:UpdateButtonAppearance()
+            if self.buttonRefreshTimer >= 0.1 then
+                self.buttonRefreshTimer = 0
+                HappyActionMirror:UpdateButtonAppearance()
+            end
         end
     end)
 
@@ -80,6 +85,26 @@ function HappyActionMirror:RegisterEvents()
 end
 
 function HappyActionMirror:OnEvent(event, ...)
+    if event == "PLAYER_REGEN_DISABLED" then
+        -- Entering combat: hide and disable UI
+        self.inCombat = true
+        if self.frame then
+            self.frame:Hide()
+        end
+        return
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        -- Leaving combat: re-enable UI
+        self.inCombat = false
+        self:ToggleFrameVisibility()
+        self:UpdateButtonAppearance()
+        return
+    end
+
+    if self.inCombat then
+        -- Do not update UI while in combat lockdown
+        return
+    end
+
     if ShouldUpdateVisibility(event) then
         self:ToggleFrameVisibility()
     end
